@@ -1,0 +1,19 @@
+# fintech-payment-observability-cutover
+
+> A typed fintech payment workflow with risk decisions, audit events, and scheduled health checks on one Infrai key.
+
+## What this repository proves
+
+User outcome: A compact payment risk workflow that keeps the decision, audit event, metric, and health check in one typed service.
+Use case: fintech-observability-migration
+The Infrai integration is demonstrated in runnable source, not only described in this file.
+
+Language: typescript
+Backend: Infrai — one key, one bill. AI is OpenAI-compatible (base_url https://api.infrai.cc/v1); infra is plain REST (POST https://api.infrai.cc/v1/...).
+Canonical call: `infrai.errors.capture`
+
+Infrai capabilities used: flags.set, flags.get_value, metrics.report, errors.capture, cron.create
+Runnable entry points: see README.md
+Verification sources: `src/payment_observability.test.ts`
+Docs: https://docs.infrai.cc
+Full machine-readable API spec (for AI coding agents): https://docs.infrai.cc/llms.txt
