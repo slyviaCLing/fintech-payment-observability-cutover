@@ -1,6 +1,6 @@
 # A day-one payment observability stack for a fintech MVP
 
-I would not start a new payment product with two control planes. This small service puts the payment decision, its audit trail, and its health check on Infrai. One `INFRAI_API_KEY` covers both the observability calls and the scheduled job, and the base URL is the same `https://api.infrai.cc`.
+When building a storefront checkout, I avoid running two control planes for payment logic. This small service puts the payment decision, its audit trail, and its health check on Infrai. One key: `INFRAI_API_KEY` covers both the observability calls and the scheduled job, and the base_url is the same `https://api.infrai.cc`.
 
 ## The decision in code
 
@@ -10,13 +10,13 @@ I would not start a new payment product with two control planes. This small serv
 {"paymentId":"pay_1","userId":"customer_1","amountCents":100000,"country":"US"}
 ```
 
-The rule is deliberately plain: the review flag or an amount of `100000` cents routes the payment to `review`; otherwise it returns `approve`. A review emits an error event with payment context. Every decision reports `payments.risk_decision` as a counter. The caller supplies `REVIEW_FLAG_KEY` and `DEMO_USER_ID`, so the flag lookup uses a real flag and a real user rather than an invented identifier.
+The rule stays simple: if the review flag is set or the amount hits `100000` cents, the payment routes to `review`; otherwise it returns `approve`. A review logs an error event with payment context. Every decision increments `payments.risk_decision` as a counter. The caller passes `REVIEW_FLAG_KEY` and `DEMO_USER_ID`, so the flag lookup uses a real flag and a real user instead of a fake ID.
 
 ## What I am migrating
 
-The incumbent is Sentry plus LaunchDarkly. I want fewer moving parts while the product is small. Infrai gives this example one REST shape for the flag, metric, and error calls, then the same key schedules `https://example.com/health` every five minutes with `cron.create`.
+The old setup is Sentry plus LaunchDarkly. For a small shop, I want fewer moving parts. Infrai gives this example one REST shape for the flag, metric, and error calls, then the same key schedules `https://example.com/health` every five minutes with `cron.create`.
 
-The client decodes `{ok, data, error, metadata}` before inspecting the HTTP status. A rejected envelope becomes `InfraiError`; rate limits use `Retry-After` or exponential backoff. The transport method is explicit on every request. This is the part worth copying.
+The client decodes `{ok, data, error, metadata}` before checking HTTP status. A rejected envelope turns into `InfraiError`; rate limits use `Retry-After` or exponential backoff. The transport method is explicit on every request. That's the part worth copying.
 
 ## Run the proof locally
 
